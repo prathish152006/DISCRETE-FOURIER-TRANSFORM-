@@ -1,104 +1,92 @@
-EXP 1 : ANALYSIS OF DFT WITH AUDIO SIGNAL
-AIM:
-To analyze audio signal by removing unwanted frequency.
+# EXP 1 A : COMPUTATION OF DFT USING DIRECT AND FFT
 
-APPARATUS REQUIRED:
-PC installed with SCILAB/Python.
+# AIM: 
+To Obtain DFT and FFT of a given sequence in SCILAB. 
 
-PROGRAM:
+# APPARATUS REQUIRED: 
+PC installed with SCILAB. 
+
+# PROGRAM (DIRECT) : 
+// DISCRETE FOURIER TRANSFORM 
 ```
-# ==============================
-# AUDIO DFT ANALYSIS IN COLAB
-# ==============================
-
-# Step 1: Install required packages
-!pip install -q librosa soundfile
-
-# Step 2: Upload audio file
-from google.colab import files
-uploaded = files.upload()   # choose your .wav / .mp3 / .flac file
-filename = next(iter(uploaded.keys()))
-print("Uploaded:", filename)
-
-# Step 3: Load audio
-import librosa, librosa.display
-import numpy as np
-import soundfile as sf
-
-y, sr = librosa.load(filename, sr=None, mono=True)  # keep original sample rate
-duration = len(y) / sr
-print(f"Sample rate = {sr} Hz, duration = {duration:.2f} s, samples = {len(y)}")
-
-# Step 4: Play audio
-from IPython.display import Audio, display
-display(Audio(y, rate=sr))
-
-# Step 5: Full FFT (DFT) analysis
-import matplotlib.pyplot as plt
-
-n_fft = 2**14   # choose large power of 2 for smoother spectrum
-Y = np.fft.rfft(y, n=n_fft)
-freqs = np.fft.rfftfreq(n_fft, 1/sr)
-magnitude = np.abs(Y)
-
-plt.figure(figsize=(12,4))
-plt.plot(freqs, magnitude)
-plt.xlim(0, sr/2)
-plt.xlabel("Frequency (Hz)")
-plt.ylabel("Magnitude")
-plt.title("FFT Magnitude Spectrum (linear scale)")
-plt.grid(True)
-plt.show()
-
-plt.figure(figsize=(12,4))
-plt.semilogy(freqs, magnitude+1e-12)
-plt.xlim(0, sr/2)
-plt.xlabel("Frequency (Hz)")
-plt.ylabel("Magnitude (log scale)")
-plt.title("FFT Magnitude Spectrum (log scale)")
-plt.grid(True)
-plt.show()
-
-# Step 6: Top 10 dominant frequencies
-N = 10
-idx = np.argsort(magnitude)[-N:][::-1]
-print("\nTop 10 Dominant Frequencies:")
-for i, k in enumerate(idx):
-    print(f"{i+1:2d}. {freqs[k]:8.2f} Hz  (Magnitude = {magnitude[k]:.2e})")
-
-# Step 7: Spectrogram (STFT)
-n_fft = 2048
-hop_length = n_fft // 4
-D = librosa.stft(y, n_fft=n_fft, hop_length=hop_length, window='hann')
-S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-
-plt.figure(figsize=(12,5))
-librosa.display.specshow(S_db, sr=sr, hop_length=hop_length,
-                         x_axis='time', y_axis='hz')
-plt.colorbar(format="%+2.0f dB")
-plt.title("Spectrogram (dB)")
-plt.ylim(0, sr/2)
-plt.show()
+clc; 
+clear; 
+xn=[1 2 3 4 4 3 2 1]; 
+ 
+n1=0:1:length(xn)-1; 
+subplot(3,1,1); 
+plot2d3(n1,xn); 
+xlabel('Time n'); 
+ylabel('Amplitude xn'); 
+title('Input Sequence'); 
+j=sqrt(-1); 
+N=length(xn); 
+Xk=zeros(1,N); 
+for k=0:N-1 
+for n=0:N-1 
+Xk(k+1)=Xk(k+1)+xn(n+1)*exp((-j*2*%pi*k*n)/N); 
+end   
+end 
+disp(Xk) 
+K1=0:1:length(Xk)-1; 
+magnitude=abs(Xk) 
+subplot(3,1,2); 
+plot2d3(K1,magnitude); 
+xlabel('frequency(Hz)'); 
+ylabel('magnitude(gain)'); 
+title('magnitude spectrum'); 
+angle = atan(imag(Xk),real(Xk)) 
+subplot(3,1,3); 
+plot2d3(K1,angle); 
+xlabel('frequency(Hz)'); 
+ylabel('Phase'); 
+title('Phase spectrum'); 
 ```
-AUDIO USED:
-good-morning-242169.mp3
+# PROGRAM (FFT) :
+```
+clear; 
+clc; 
+close; 
+xn = [0.5 0.5 0.5 0.5 0 0 0 0] 
+ 
+n1=0:1:length(xn)-1; 
+subplot(2,2,1); 
+plot2d3(n1,xn); 
+xlabel('Time n'); 
+ylabel('Amplitude'); 
+title('Input Sequence'); 
+ 
+Xk = fft(xn); 
+ 
+K1=0:1:length(Xk)-1; 
+magnitude=abs(Xk) 
+subplot(2,2,2); 
+plot2d3(K1,magnitude); 
+xlabel('frequency(Hz)'); 
+ylabel('magnitude(gain)'); 
+title('magnitude spectrum'); 
+angle = atan(imag(Xk),real(Xk)) 
+subplot(2,2,3); 
+plot2d3(K1,angle); 
+xlabel('frequency(Hz)'); 
+ylabel('Phase'); 
+title('Phase spectrum') 
+y= ifft(Xk) 
+ 
+n2=0:1:length(y)-1; 
+subplot(2,2,4) 
+plot2d3(n2,y) 
+xlabel('Time n'); 
+ylabel('Amplitude'); 
+title('Inverse FFT OF X(K)');
+```
 
-OUTPUT:
-Top 10 Dominant Frequencies:
+# OUTPUT (DIRECT) : 
+<img width="1852" height="951" alt="image" src="https://github.com/user-attachments/assets/88b85696-8f3f-4729-b00b-0260674ca445" />
 
-2100.59 Hz (Magnitude = 1.91e+00)
-2097.66 Hz (Magnitude = 1.90e+00)
-2103.52 Hz (Magnitude = 1.90e+00)
-2106.45 Hz (Magnitude = 1.90e+00)
-2109.38 Hz (Magnitude = 1.90e+00)
-2094.73 Hz (Magnitude = 1.90e+00)
-2112.30 Hz (Magnitude = 1.90e+00)
-2091.80 Hz (Magnitude = 1.89e+00)
-2088.87 Hz (Magnitude = 1.89e+00)
-2115.23 Hz (Magnitude = 1.89e+00)
-<img width="1010" height="393" alt="image" src="https://github.com/user-attachments/assets/3bb8bcf1-684d-4f74-adde-a145f0f16a84" />
-<img width="1012" height="393" alt="image" src="https://github.com/user-attachments/assets/27d8c7b4-a2d2-4ff7-8d6d-f3d1776b4ae5" />
-<img width="958" height="470" alt="image" src="https://github.com/user-attachments/assets/426cd1c2-354d-46d2-a143-2d422b2e094f" />
+# OUTPUT (FFT) :
+<img width="1919" height="977" alt="image" src="https://github.com/user-attachments/assets/f1ecae3d-b64f-4277-a28b-40da10ff2fad" />
 
-RESULTS
-BY USING AUDIO SIGNAL THE DFT IS ANALYSISED USING PYTHON.
+
+# RESULT: 
+Thus,The DFT and FFT of the given sequence is obtained using SCILAB.
